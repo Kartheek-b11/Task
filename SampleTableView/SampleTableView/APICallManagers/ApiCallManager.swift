@@ -9,24 +9,27 @@
 import Foundation
 import Alamofire
 import SwiftyJSON
-class ApiCallmanager {
-	func getAllCategories(success:@escaping (JSON) -> Void, failure:@escaping (Error) -> Void){
-		 let urlString = "https://dl.dropboxusercontent.com/s/2iodh4vg0eortkl/facts.json"
-				Alamofire.request(urlString).validate().responseJSON { (data) in
-//					print("get Cart Request  \(data.request)")
-//					print("get Cart RESPONSE Value\(data.result.value)")
-//					print("get Cart RESPONSE result\(data.result)")
-//					print("get Cart RESPONSE \(data)")
-					switch data.result {
-					case .success(let json):
-						let resJson = JSON(json)
-						success(resJson)
-					case .failure( _): break
-//						debug_log.error("\(Log.stats()) \(error.localizedDescription)")/
-//						FIRAnalytics.eventTracking(eventName: "Cart_API_Failure", parameters: ["error":"\(error.localizedDescription)"])
-//						failure(error)
-//						self.showBanner("\(error.localizedDescription)")
-					}
-				}
-	}
+class ApiCallManager {
+	
+	class func getAllCategories(success:@escaping ([String: Any]) -> Void, failure:@escaping (Error) -> Void){
+		
+		
+		var request = URLRequest(url: URL(string: "https://dl.dropboxusercontent.com/s/2iodh4vg0eortkl/facts.json")!,timeoutInterval: Double.infinity)
+		request.httpMethod = "GET"
+		let task = URLSession.shared.dataTask(with: request) { data, response, error in
+		  guard let data = data else {
+			print(String(describing: error))
+			return
+		  }
+			do {
+				let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+				print("response \(json)")
+				success(json!)
+			} catch {
+				print("JSON error: \(error.localizedDescription)")
+			}
+		}
+
+		task.resume()
+}
 }
